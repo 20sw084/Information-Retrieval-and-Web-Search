@@ -3,32 +3,31 @@ import os
 from collections import defaultdict
 import math
 
-def trainBigramLanguageModel(training_text):
+def trainBiagramLanguagemodel(training_text):
     unigram_freq = defaultdict(int)
     bigram_freq = defaultdict(int)
     
     lines = training_text.splitlines()
     for line in lines:
-        line = "<start>" + line  # Add start token
+        line = "<start>" + line
         for i in range(len(line)):
-            unigram_freq[line[i]] += 1  # Count unigrams
+            unigram_freq[line[i]] += 1
             if i > 0:
-                bigram_freq[(line[i-1], line[i])] += 1  # Count bigrams
+                bigram_freq[(line[i-1], line[i])] += 1
     
     return unigram_freq, bigram_freq
 
-def identifyLanguage(test_text, languages, unigram_dicts, bigram_dicts):
+def identifyLanguage(test_text, languages, unigram_dicts, biagram_dicts):
     max_prob = float('-inf')
     best_language = None
-    vocab_size = len(set(char for d in unigram_dicts for char in d.keys()))  # Combined vocabulary
+    vocab_size = len(set(char for d in unigram_dicts for char in d.keys()))
     
     for i, lang in enumerate(languages):
         unigram_freq = unigram_dicts[i]
-        bigram_freq = bigram_dicts[i]
+        bigram_freq = biagram_dicts[i]
         
-        # Calculate log-probability with add-one smoothing
         log_prob = 0
-        test_text = "<start>" + test_text  # Add start token
+        test_text = "<start>" + test_text
         for j in range(1, len(test_text)):
             w1 = test_text[j-1]
             w2 = test_text[j]
@@ -50,7 +49,6 @@ def main():
     training_folder = sys.argv[1]
     test_file = sys.argv[2]
     
-    # Load training data
     languages = ['English', 'French', 'Italian']
     unigram_dicts = []
     bigram_dicts = []
@@ -58,11 +56,10 @@ def main():
     for lang in languages:
         with open(os.path.join(training_folder, lang), 'r', encoding='latin-1') as f:
             training_text = f.read()
-        unigram, bigram = trainBigramLanguageModel(training_text)
+        unigram, bigram = trainBiagramLanguagemodel(training_text)
         unigram_dicts.append(unigram)
         bigram_dicts.append(bigram)
     
-    # Process test data
     output_lines = []
     with open(test_file, 'r', encoding='latin-1') as test_f:
         for i, line in enumerate(test_f, start=1):
@@ -70,12 +67,10 @@ def main():
             predicted_language = identifyLanguage(line, languages, unigram_dicts, bigram_dicts)
             output_lines.append(f"{i} {predicted_language}")
     
-    # Write results to output file
     with open("languageIdentification.output", "w", encoding='latin-1') as output_f:
         output_f.write("\n".join(output_lines))
     
     print("Output written to languageIdentification.output")
-    # Example usage in main
     output_file = "languageIdentification.output"
     solution_file = "languageIdentification.data/solution"
     answers_file = "languageIdentification.answers"
@@ -95,10 +90,8 @@ def calculate_accuracy(output_file, solution_file, answers_file):
 
     accuracy = (correct / total) * 100
 
-    # Write the accuracy to the answers file
     with open(answers_file, "w") as ans:
         ans.write(f"Accuracy of the language identifier: {accuracy:.2f}%\n")
-
 
 if __name__ == "__main__":
     main()
